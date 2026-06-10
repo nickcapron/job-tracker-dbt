@@ -1,0 +1,7 @@
+status_code,status_label,is_active
+applied,Applied,true
+screening,Phone Screen,true
+interview,Interviewing,true
+offer,Offer Received,true
+rejected,Rejected,false
+withdrawn,Withdrawn,false
