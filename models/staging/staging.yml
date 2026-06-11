@@ -1,0 +1,111 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    description: "Raw data landing zone - populated by ingestion pipeline and web app"
+    tables:
+      - name: jobs
+        description: "Job postings ingested from external job board APIs"
+        columns:
+          - name: id
+            description: "Primary key."
+          - name: external_id
+            description: "Job ID from the source job board."
+          - name: source
+            description: "Job board the posting came from e.g. linkedin, indeed."
+          - name: company_name
+            description: "Company name as listed on the job board."
+          - name: job_title
+            description: "Job title as listed on the job board."
+          - name: location
+            description: "Job location as listed on the job board."
+          - name: is_remote
+            description: "True if the job is remote or hybrid."
+          - name: salary_min
+            description: "Minimum salary if disclosed."
+          - name: salary_max
+            description: "Maximum salary if disclosed."
+          - name: posted_date
+            description: "Date the job was posted."
+          - name: url
+            description: "Direct link to the job posting."
+          - name: created_at
+            description: "Timestamp when this record was ingested."
+
+      - name: applications
+        description: "User applications written by the web app when user applies to a job."
+        columns:
+          - name: id
+            description: "Primary key."
+          - name: job_id
+            description: "Foreign key to raw.jobs."
+          - name: status_code
+            description: "Current application status."
+          - name: applied_date
+            description: "Date the user submitted the application."
+          - name: notes
+            description: "Optional user notes about the application."
+          - name: created_at
+            description: "Timestamp when this record was created."
+          - name: updated_at
+            description: "Timestamp when this record was last updated."
+
+      - name: user_profile
+        description: "User profile including skills, experience, and job preferences."
+        columns:
+          - name: id
+            description: "Primary key."
+          - name: full_name
+            description: "User full name."
+          - name: email
+            description: "User email address."
+          - name: target_titles
+            description: "Array of job titles the user is targeting."
+          - name: target_locations
+            description: "Array of locations the user is open to."
+          - name: skills
+            description: "Array of skills the user has."
+          - name: years_experience
+            description: "Years of total professional experience."
+          - name: salary_min
+            description: "Minimum acceptable salary."
+          - name: salary_max
+            description: "Maximum expected salary."
+
+models:
+  - name: stg_jobs
+    description: "Cleaned and typed job postings from raw.jobs. One row per job posting."
+    columns:
+      - name: job_id
+        description: "Primary key. Renamed from id."
+        tests:
+          - unique
+          - not_null
+      - name: company_name
+        description: "Company name as ingested from job board."
+        tests:
+          - not_null
+      - name: is_salary_disclosed
+        description: "True when salary_min is not null."
+
+  - name: stg_applications
+    description: "Cleaned application records from raw.applications. One row per application."
+    columns:
+      - name: application_id
+        description: "Primary key. Renamed from id."
+        tests:
+          - unique
+          - not_null
+      - name: job_id
+        description: "Foreign key to stg_jobs."
+        tests:
+          - not_null
+      - name: days_since_applied
+        description: "Calculated days between applied_date and today."
+
+  - name: stg_user_profile
+    description: "Cleaned user profile from raw.user_profile. One row per user."
+    columns:
+      - name: user_id
+        description: "Primary key. Renamed from id."

@@ -2,33 +2,44 @@ version: 2
 
 models:
   - name: fct_applications
+    description: "One row per job application. Joins application activity to job details and status labels. Core fact table for tracking application pipeline and outcomes."
     columns:
       - name: application_id
+        description: "Primary key. Unique identifier for each application."
         tests:
           - unique
           - not_null
       - name: job_id
+        description: "Foreign key to the job posting."
         tests:
           - not_null
       - name: status_code
+        description: "Current application status code."
         tests:
           - not_null
           - accepted_values:
               values: ['applied', 'screening', 'interview', 'offer', 'rejected', 'withdrawn']
       - name: applied_date
+        description: "Date the application was submitted."
         tests:
           - not_null
+      - name: days_since_applied
+        description: "Calculated days between applied_date and today. Updates on every query."
 
   - name: dim_companies
+    description: "Distinct companies from ingested job postings."
     columns:
       - name: company_name
+        description: "Primary key. Company name as ingested from job board."
         tests:
           - not_null
           - unique
 
   - name: dim_application_statuses
+    description: "Lookup table of valid application statuses. Filtered to active statuses only."
     columns:
       - name: status_code
+        description: "Primary key. Short code used in applications table."
         tests:
           - unique
           - not_null
